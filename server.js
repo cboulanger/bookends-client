@@ -35,9 +35,35 @@ server.get('/read', function(req, res){
     });
 });
 
+server.get('/update', function(req, res){
+    var data ={};
+    for( var key in req.query )
+    {
+        data[key] = req.query[key];
+    }
+    client.update( data, function(error, result){
+        if ( error ) result = "ERROR: " + error;
+        else result ="OK";
+        res.send(result);
+    });
+});
+
+server.get('/create', function(req, res){
+    var data ={};
+    for( var key in req.query )
+    {
+        data[key] = req.query[key];
+    }
+    client.create( data, function(error, result){
+        if ( error ) result = "ERROR: " + error;
+        else result ="Created record # " + result;
+        res.send(result);
+    });
+});
+
 var port = 8080;
 var host = 'localhost';
 server.listen(port);
 console.log(
-    "Bookends Bridge running at http://" + host + ":" + port + 
+    "Bookends bridge running at http://" + host + ":" + port + 
     ", serving database '" + database + "'");
