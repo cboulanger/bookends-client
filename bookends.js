@@ -14,13 +14,12 @@ exports.client = function(host,port)
     function cleanup ( json )
     {    
         json = json
-            .replace(/"/g,'\\"') // escape quotation marks that break JSON
-            .replace(/\&\#034\;/g,'\\"')
-            .replace(/´´/g, '"') // restore quotation marks in the JSON structure
-            .replace(/" /g,'"')  // remove the placeholder space 
-            .replace(/<\/?[a-z][a-z0-9]*[^<>]*>/ig, ""); // replace tags
-            
+            .replace(/[\x00-\x1f]/,"")      // strip all control characters
+            .replace(/\&\#034\;/g,'\\"')    // escape quotation mark
+            .replace(/<\/?[a-z][a-z0-9]*[^<>]*>/ig, "") // replace html tags
+            ;
         json = json.substr( 0, json.length-1 ); // remove trailing comma
+        return "[" + json + "]";    
         
         // strip non-printing characters, todo: replace by regex
         var str = "";
