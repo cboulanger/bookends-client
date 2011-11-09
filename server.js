@@ -12,13 +12,11 @@ server.configure(function(){
 
 // bookends client
 var bconf = config.bookends;
-var client  = new bookends.client(bconf.database, bconf.host, bconf.port);
+var client  = new bookends.client( bconf.host, bconf.port );
     
 // routing
 require("./routes").setRoutes( server, client );
 
 server.listen(config.server.port);
-var msg = 
-    "Bookends bridge running at http://" + config.server.host + 
-    ":" + config.server.port + ", serving database '" + bconf.database + "'";
+var msg = "Bookends bridge running at http://" + config.server.host + ":" + config.server.port;
 console.log(msg);

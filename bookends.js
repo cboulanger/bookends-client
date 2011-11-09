@@ -1,14 +1,8 @@
 var querystring = require('querystring'),
     request     = require('request');
 
-exports.client = function(database,host,port)
+exports.client = function(host,port)
 {
-        
-    if( ! database )
-    {
-        throw new Error("No database specified");
-    }
-
     var host = host || "localhost",
         port = port || 2001,
         server_get_url  = "http://" + host + ":" + port + "/$BEGet?",
@@ -17,25 +11,23 @@ exports.client = function(database,host,port)
     /**
      * Cleanup the data sent by the bookends server
      */
-    function cleanup ( body )
+    function cleanup ( json )
     {    
-        body = body
-            .replace(/\" /g,'"')
+        json = json
+            .replace(/"/g,'\\"') // escape quotation marks that break JSON
+            .replace(/\&\#034\;/g,'\\"')
+            .replace(/´´/g, '"') // restore quotation marks in the JSON structure
+            .replace(/" /g,'"')  // remove the placeholder space 
             .replace(/<\/?[a-z][a-z0-9]*[^<>]*>/ig, ""); // replace tags
-        body = body.substr( 0, body.length-1 );
-        // todo: convert numerical entities
-        //    .replace(/&#(\d+);/g, function(str) {
-        //        return "\\" + str;
-        //        return String.fromCharCode(RegExp.$1);
-        //    });
+            
+        json = json.substr( 0, json.length-1 ); // remove trailing comma
         
-        // this seems to be the only way to strip newlines
-        // the usual .replace(/\r/g,""); doesn't work
+        // strip non-printing characters, todo: replace by regex
         var str = "";
-        for(var i=0; i<body.length; i++)
+        for(var i=0; i<json.length; i++)
         {
-            if ( body.charCodeAt(i) !== 10 ){
-                str += body.charAt(i);
+            if ( json.charCodeAt(i) > 31 ){
+                str += json.charAt(i);
             }
         }        
         return "[" + str + "]";    
@@ -53,21 +45,17 @@ exports.client = function(database,host,port)
      * @param format {String} 
      *      The name of the Bookends format. Defaults to "JSON".
      */
-    function query ( data, callback, format )
+    function query ( database, query, callback, format )
     {
-        var key, value;
-        for( key in data )
-        {
-            value = data[key];
-            break;
-        }
         data = { 
             DB          : database,
-            SQLQuery    : key + "=" + value, 
+            SQLQuery    : query, 
             Format      : format = format || "JSON",
         };
         var url = server_get_url + querystring.stringify(data);
+        
         console.log(url);
+        
         request(url, function (error, response, body) {
             var beError = body.indexOf("Error"), result = null;
             if ( error || ( beError != -1 && beError < 10 ) ) 
@@ -87,8 +75,8 @@ exports.client = function(database,host,port)
                 }
                 catch( e )
                 {
-                    error = e;
-                    console.log("Invalid json:" + json);
+                    // todo: parse bookends error messages
+                    error = e+ "\n" + json;
                 }   
             }
             callback( error, result );
@@ -105,7 +93,7 @@ exports.client = function(database,host,port)
      *      there was an error. When the update succeeded, the argument
      *      is null. 
      */
-    function update( data, callback )
+    function update( database, data, callback )
     {
         data.db = database;
         data.updateUniqueID = data.id;
@@ -133,7 +121,7 @@ exports.client = function(database,host,port)
      *      is null. 
      * @return 
      */
-    function create ( callback )
+    function create ( database, callback )
     {
         var data = {
             DB : database,
@@ -164,9 +152,9 @@ exports.client = function(database,host,port)
         /**
          * Run a query
          */
-        query : function (data, callback )
+        query : function ( database, data, callback )
         {
-            query( data, callback );  
+            query( database, data, callback );  
         },
                 
         
@@ -177,9 +165,9 @@ exports.client = function(database,host,port)
          * @return Returns an array of integers with the unique Ids of the
          *      records.
          */
-        find : function( data, callback )
+        find : function( database, thequery, callback )
         {
-            query( data, function(error, result) {
+            query( database, thequery, function(error, result) {
                 var ids = null;
                 if ( ! error )
                 {
@@ -195,12 +183,12 @@ exports.client = function(database,host,port)
         /**
          * Creates a new record
          */
-        create : function( data, callback )
+        create : function( database, data, callback )
         {
             var that=this;
-            create( function(error){
+            create( database, function(error){
                 if ( error ) callback( error, null );
-                else that.find( {thedate:9999}, function (error, result ){
+                else that.find( database, "thedate=9999", function (error, result ){
                     if ( error ) callback( error, null );
                     else {
                         if ( ! result || ! result instanceof Array || result.length == 0 )
@@ -212,7 +200,7 @@ exports.client = function(database,host,port)
                             var id = result[result.length-1];
                             if ( ! data.thedate ) data.thedate = 2011; // todo
                             data.id = id;
-                            update(data,function(error){
+                            update( database, data, function(error){
                                 if( error ) callback( error,null );
                                 else callback( null, id );
                             });                        
@@ -225,17 +213,17 @@ exports.client = function(database,host,port)
         /**
          * Returns the record with the given id
          */
-        read : function( id, callback )
+        read : function( database, id, callback )
         {
-            query( { uniqueId : id }, callback );
+            query( database, "uniqueId="+ id, callback );
         },
         
         /**
          * Updates a record.
          */
-        update : function( data, callback )
+        update : function( database, data, callback )
         {
-            update( data, callback ); 
+            update( database, data, callback ); 
         }
     };
 };
