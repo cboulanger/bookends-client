@@ -5,7 +5,7 @@ exports.setRoutes = function(server, client){
         res.send("ok");
     })
 
-    server.get('/query/:db/:query', function(req, res){
+    server.get('/:db/query/:query', function(req, res){
         client.query( req.params.db, req.params.query, function(error, result){
             if ( result ) result = JSON.stringify(result);
             else result = "ERROR: " + error;
@@ -13,7 +13,7 @@ exports.setRoutes = function(server, client){
         });
     });
     
-    server.get('/find/:db/:id', function(req, res){
+    server.get('/:db/find/:id', function(req, res){
         client.find( req.params.db, req.params.id, function(error, result){
             if ( result ) result = JSON.stringify(result);
             else result = "ERROR: " + error;
@@ -21,7 +21,7 @@ exports.setRoutes = function(server, client){
         });
     });
     
-    server.get('/read/:db/:id', function(req, res){
+    server.get('/:db/read/:id', function(req, res){
         client.read( req.params.db, req.params.id, function(error, result){
             if ( result ) result = JSON.stringify(result);
             else result = "ERROR: " + error;
@@ -29,7 +29,7 @@ exports.setRoutes = function(server, client){
         });
     });
     
-    server.get('/update/:db/:id', function(req, res){
+    server.get('/:db/update/:id', function(req, res){
         var data ={ id : req.params.id };
         for( var key in req.query )
         {
@@ -43,7 +43,7 @@ exports.setRoutes = function(server, client){
         });
     });
     
-    server.get('/create/:db', function(req, res){
+    server.get('/:db/create', function(req, res){
         var data ={};
         for( var key in req.query )
         {
