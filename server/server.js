@@ -1,6 +1,6 @@
-var express     = require('express'),
+var express     = require('../node_modules/express'),
     server      = express.createServer(),
-    bookends    = require('./bookends'),
+    bookends    = require('../bookends'),
     config      = require('./config');
      
 server.configure(function(){

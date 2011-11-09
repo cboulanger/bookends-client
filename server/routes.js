@@ -5,6 +5,7 @@ exports.setRoutes = function(server, client){
         res.send("ok");
     })
 
+
     server.get('/:db/query/:query', function(req, res){
         client.query( req.params.db, req.params.query, function(error, result){
             if ( result ) result = JSON.stringify(result);
@@ -38,7 +39,7 @@ exports.setRoutes = function(server, client){
         }
         client.update( req.params.db, data, function(error, result){
             if ( error ) result = "ERROR: " + error;
-            else result ="OK";
+            else result ='"OK"';
             res.send(result);
         });
     });
@@ -51,7 +52,6 @@ exports.setRoutes = function(server, client){
         }
         client.create( req.params.db, data, function(error, result){
             if ( error ) result = "ERROR: " + error;
-            else result ="Created record # " + result;
             res.send(result);
         });
     });

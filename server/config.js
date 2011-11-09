@@ -1,7 +1,6 @@
 exports.bookends = {
     host : "localhost",
-    port : 2001,
-    database : "default.bdb"
+    port : 2001
 };
     
 exports.server = {
