@@ -1,7 +1,7 @@
 Bookends javascript client
 ==========================
 
-This code is intended to add scriptable data manipulation to the Bookends 
+This code is intended to add scriptability to the Bookends 
 reference manager (http://www.sonnysoftware.com), by providing a bridge
 betweeen javascript and  the HTTP server built into Bookends, using node-js.
 

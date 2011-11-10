@@ -1,12 +1,17 @@
 var querystring = require('querystring'),
     request     = require('request');
 
+/**
+ * 
+ * @todo Handle "Can't find library"
+ */
 exports.client = function(host,port)
 {
     var host = host || "localhost",
         port = port || 2001,
         server_get_url  = "http://" + host + ":" + port + "/$BEGet?",
-        server_post_url = "http://" + host + ":" + port + "/BEPost";
+        server_post_url = "http://" + host + ":" + port + "/BEPost",
+        debug = false;
 
     /**
      * Cleanup the data sent by the bookends server
@@ -14,9 +19,15 @@ exports.client = function(host,port)
     function cleanup ( json )
     {    
         json = json
-            .replace(/[\x00-\x1f]/,"")      // strip all control characters
+            .replace(/(\r\n|\r|\n)/g,"")    // strip linebreaks
+            .replace(/\\/,"")               // strip backslashes
+            .replace(/<HTML><HEAD>.*<\/HEAD><BODY>/i,"") // strip HTML markup
+            .replace(/<BR \/><\/BODY><\/HTML>/i,"")
+            .replace(/\}\,<BR \/>/gi,"},")  // strip BR tag following a reference
+            .replace(/<BR \/>/gi,"\\n")     // convert all others into escaped linebreaks 
+            .replace(/[\x00-\x1f]/g,"")     // strip all control characters
             .replace(/\&\#034\;/g,'\\"')    // escape quotation mark
-            .replace(/<\/?[a-z][a-z0-9]*[^<>]*>/ig, ""); // replace html tags
+            ;
 
         json = json.substr( 0, json.length-1 ); // remove trailing comma
         return "[" + json + "]";   
@@ -43,10 +54,11 @@ exports.client = function(host,port)
         };
         var url = server_get_url + querystring.stringify(data);
         
-        console.log(url);
+        if( debug ) console.log(url);
         
         request(url, function (error, response, body) {
-            var beError = body.indexOf("Error"), result = null;
+            var beError, result = null;
+            if( ! error && body && body.length < 500 ) beError= body.indexOf("Error");
             if ( error || ( beError != -1 && beError < 10 ) ) 
             {
                 error = error || new Error( body );
@@ -65,7 +77,7 @@ exports.client = function(host,port)
                 catch( e )
                 {
                     // todo: parse bookends error messages
-                    error = e+ "\n" + json;
+                    error = e+ "\n<pre>" + json + "</pre>";
                 }   
             }
             callback( error, result );
@@ -92,7 +104,7 @@ exports.client = function(host,port)
             url : url,
             body : querystring.stringify(data)
         };
-        console.log(options);
+        if(debug) console.log(options);
         request.post(options, function (error, response, body) {
             if ( error || ( body.indexOf("successfully updated") == -1 ) ) 
             {
@@ -122,7 +134,7 @@ exports.client = function(host,port)
             url : url,
             body : querystring.stringify(data)
         };
-        console.log(options);
+        if (debug) console.log(options);
         request.post(options, function (error, response, body) {
             console.log(body);
             if ( error || ( body.indexOf("reference imported") == -1 ) ) 
@@ -137,6 +149,11 @@ exports.client = function(host,port)
      * Return the bookends client API
      */
     return {
+        
+        enableDebug : function(value)
+        {
+            debug = value;
+        },
         
         /**
          * Run a query
@@ -204,7 +221,9 @@ exports.client = function(host,port)
          */
         read : function( database, id, callback )
         {
-            query( database, "uniqueId="+ id, callback );
+            query( database, "uniqueId="+ id, function( err, result){
+                callback( err, result ? result[0] : null  );
+            } );
         },
         
         /**
