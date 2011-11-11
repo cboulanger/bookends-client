@@ -36,12 +36,15 @@
  */
 
 var bookends    = require('../bookends'),
-    db          = "database1.bdb",
     client      = new bookends.client("localhost",2001),
     
-    stopwords   = "a the ein eine der die das le la l' az",
-    range       = [2000,2000],
-    year        = range[0];
+    // configure to your needs:
+    db          = "database1.bdb",
+    stopwords   = "a the ein eine der die das le la l' az", // adapt to your language
+    range       = [2000,2000], // set range: [first year,last year]
+    
+    // don't touch, this variable will be incremented
+    year        = range[0]; 
     
 //client.enableDebug(true);
 
