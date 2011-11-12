@@ -1,7 +1,12 @@
 Bookends javascript client
 ==========================
 
-This code is intended to add scriptability to the Bookends 
+*** Warning ***
+This code is experimental/alpha-grade quality. No serious testing has been done.
+Don't EVER use real data with it, always use a copy. You have been warned.
+*** End Warning ***
+
+This module is intended to add scriptability to the Bookends 
 reference manager (http://www.sonnysoftware.com), by providing a bridge
 betweeen javascript and  the HTTP server built into Bookends, using node-js.
 
@@ -20,7 +25,7 @@ manipulate your reference data.
 Usage:
 ------
 
-Yoou can use the client in several ways:
+Yoou can use the client in two ways:
 
 1) JSON-Server
 
@@ -42,6 +47,9 @@ GET [name of database]/query/[bookends/valentina-style sql query]
     an empty array is returned.
 
     Example: http://localhost:8080/mydb/query/title REGEX 'my funny valentina'
+
+    See the Bookends user guide, section "SQL/Regex Search" (p. 281seq) for the
+    powerful search syntax at your disposal.
 
 GET [name of database]/find/[bookends/valentina-style sql query]
     returns an array of integers, which are the uniqueIds of the records.
@@ -65,7 +73,8 @@ allow it (which is probably a good idea).
 -----------------------
 
 The "examples" directory contains a few sample console scripts that use the 
-bookends client API directly. You can start each script directly with node. 
+bookends client API directly. You can start each script directly with node. These
+scripts also demonstrate how to deal with the asynchroneous nature of node. 
 
 
 

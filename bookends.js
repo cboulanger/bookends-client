@@ -31,12 +31,24 @@ exports.client = function(host,port)
 
         json = json.substr( 0, json.length-1 ); // remove trailing comma
         return "[" + json + "]";   
-    }    
+    }
+    
+    /**
+     * Check for valid database name and add a ".bdb" extension to the name 
+     * if necessary
+     * @todo better sanity check
+     */
+    function checkDbName( db )
+    {
+        if( db.trim() === "" ) return false;
+        if( db.indexOf(".bdb") == -1 ) return db + ".bdb";
+        return db;
+    }
     
     /**
      * Query the bookends server with a GET request
-     * @param data {Object} 
-     *      The query data
+     * @param thequery {String} 
+     *      The sql query 
      * @param callback {function}
      *      The callback receives two argument, error and result.
      *      If successful, the result is an array with the data record 
@@ -45,13 +57,16 @@ exports.client = function(host,port)
      * @param format {String} 
      *      The name of the Bookends format. Defaults to "JSON".
      */
-    function query ( database, query, callback, format )
+    function query ( database, thequery, callback, format )
     {
         data = { 
-            DB          : database,
-            SQLQuery    : query, 
-            Format      : format = format || "JSON",
+            DB          : checkDbName(database),
+            SQLQuery    : thequery, 
+            Format      : format = format || "JSON"
         };
+        
+        if ( ! data.DB ) return callback( new Error ("Invalid database name '" + database +"'" ) );
+        
         var url = server_get_url + querystring.stringify(data);
         
         if( debug ) console.log(url);

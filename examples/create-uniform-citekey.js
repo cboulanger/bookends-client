@@ -2,6 +2,11 @@
  * (Almost) unique citation key generation
  * ---------------------------------------
  * 
+ * *** Warning ***
+ *   This code is experimental/alpha-grade quality. No serious testing has been done.
+ *   Don't EVER use real data with it, always use a copy. You have been warned.
+ * *** End Warning ***
+ * 
  * This script updates all citation keys ("user1" field) to conform to the 
  * following pattern: [last name]-[year]-[first word in title]
  * 
