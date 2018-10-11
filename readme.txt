@@ -1,3 +1,6 @@
+NOTE: This project has been discontinued. Use [cboulanger/bookends-api](https://github.com/cboulanger/bookends-api) instead.
+
+
 Bookends javascript client
 ==========================
 
